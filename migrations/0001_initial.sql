@@ -1,0 +1,17 @@
+CREATE TABLE taxonomies (id TEXT PRIMARY KEY, kind TEXT NOT NULL CHECK(kind IN ('category','tag','status')), name TEXT NOT NULL, color TEXT NOT NULL DEFAULT '#64748b', is_closed INTEGER NOT NULL DEFAULT 0, sort_order INTEGER NOT NULL DEFAULT 0, archived INTEGER NOT NULL DEFAULT 0, UNIQUE(kind,name));
+INSERT INTO taxonomies(id,kind,name,color,is_closed,sort_order) VALUES ('status-todo','status','未开始','#64748b',0,0),('status-doing','status','进行中','#2563eb',0,1),('status-done','status','已完成','#059669',1,2);
+CREATE TABLE tasks (id TEXT PRIMARY KEY, title TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', notes TEXT NOT NULL DEFAULT '', status_id TEXT NOT NULL REFERENCES taxonomies(id), priority INTEGER NOT NULL DEFAULT 2, progress INTEGER NOT NULL DEFAULT 0, received_at TEXT NOT NULL, due_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, completed_at TEXT, parent_id TEXT REFERENCES tasks(id), version INTEGER NOT NULL DEFAULT 1, reminder_offsets TEXT NOT NULL DEFAULT '[4320,1440,0]', overdue_interval INTEGER NOT NULL DEFAULT 1440);
+CREATE INDEX task_due ON tasks(due_at); CREATE INDEX task_completed ON tasks(completed_at); CREATE INDEX task_parent ON tasks(parent_id);
+CREATE TABLE task_taxonomies (task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE, taxonomy_id TEXT NOT NULL REFERENCES taxonomies(id), PRIMARY KEY(task_id,taxonomy_id));
+CREATE INDEX taxonomy_tasks ON task_taxonomies(taxonomy_id);
+CREATE TABLE activities (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE, kind TEXT NOT NULL, content TEXT NOT NULL, changes TEXT, created_at TEXT NOT NULL);
+CREATE INDEX activity_task ON activities(task_id,created_at);
+CREATE TABLE attachments (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id), name TEXT NOT NULL, mime TEXT NOT NULL, size INTEGER NOT NULL, content BLOB NOT NULL, created_at TEXT NOT NULL);
+CREATE INDEX attachment_task ON attachments(task_id);
+CREATE TABLE settings (id INTEGER PRIMARY KEY CHECK(id=1), value TEXT NOT NULL);
+INSERT INTO settings VALUES(1,'{"timezone":"Asia/Shanghai","default_reminder_offsets":[4320,1440,0],"default_overdue_interval":1440,"email":"","email_enabled":false}');
+CREATE TABLE sessions (token_hash TEXT PRIMARY KEY, expires_at TEXT NOT NULL);
+CREATE TABLE login_attempts (key TEXT PRIMARY KEY, attempts INTEGER NOT NULL, window_start INTEGER NOT NULL);
+CREATE TABLE push_subscriptions (id TEXT PRIMARY KEY, endpoint TEXT NOT NULL UNIQUE, p256dh TEXT NOT NULL, auth TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE notifications (id TEXT PRIMARY KEY, task_id TEXT REFERENCES tasks(id), title TEXT NOT NULL, body TEXT NOT NULL, channel TEXT NOT NULL DEFAULT 'push', status TEXT NOT NULL DEFAULT 'pending', scheduled_at TEXT NOT NULL, created_at TEXT NOT NULL, sent_at TEXT, attempts INTEGER NOT NULL DEFAULT 0, next_attempt_at TEXT, lease_until TEXT, last_error TEXT, reminder_key TEXT NOT NULL UNIQUE, task_version INTEGER, subscription_id TEXT, email_to TEXT);
+CREATE INDEX notification_pending ON notifications(status,next_attempt_at,scheduled_at);

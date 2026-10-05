@@ -1,0 +1,47 @@
+{
+  "name": "task-workbench",
+  "private": true,
+  "version": "0.1.0",
+  "description": "个人任务工作台：自定义分类、标签和状态，日程视图、附件、历史记录与 PWA 提醒。",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/18861870889/task-workbench.git"
+  },
+  "homepage": "https://github.com/18861870889/task-workbench#readme",
+  "bugs": { "url": "https://github.com/18861870889/task-workbench/issues" },
+  "engines": { "node": ">=24.13.0" },
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup-local.mjs",
+    "dev": "wrangler dev --port 8787",
+    "dev:ui": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --test-concurrency=1 tests/*.test.mjs",
+    "test:local": "node scripts/test-local.mjs",
+    "db:local": "wrangler d1 migrations apply task-workbench --local",
+    "db:remote": "wrangler d1 migrations apply task-workbench --remote",
+    "deploy": "npm run build && wrangler deploy",
+    "types": "wrangler types"
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "2.0.0",
+    "@fullcalendar/react": "7.1.0",
+    "hono": "4.13.13",
+    "lucide-react": "1.52.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "temporal-polyfill": "1.0.5",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "typescript": "7.0.2",
+    "vite": "8.3.2",
+    "wrangler": "4.147.0"
+  }
+}

@@ -1,0 +1,5 @@
+APP_PASSWORD=replace-with-at-least-24-random-characters
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=
+APP_ORIGIN=http://localhost:8787
